@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../vue.js"></script>
+    <script src="../axios.min.js"></script>
+    <script src="../vue-router.js"></script>
+</head>
+<body>
+   <div id="app">
+      <h1>登录</h1>
+      用户名：<input type="text" v-model="user_name"><br>
+      密码：<input type="text" v-model="user_pwd"><br>
+      <button @:click="login">登录</button>
+   </div>
+</body>
+</html>
+<script>
+   var em= new Vue({
+        el:"#app",
+        data:{
+            user_name:'',
+            user_pwd:''
+        },
+        methods:{
+            login(){
+               const user_name=this.user_name
+               const user_pwd=this.user_pwd
+               console.log(user_name,user_pwd)
+
+               //发送 post请求， 将 用户名和密码发送给后端登录接口
+               axios.post("http://localhost:8080/user/login",{user_name:user_name,user_pass:user_pass}).then(function(res){
+                        console.log(res)
+                    })
+            }
+        }
+    })
+</script>
