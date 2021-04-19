@@ -14,7 +14,7 @@
       <h1>登录</h1>
       用户名：<input type="text" v-model="user_name"><br>
       密码：<input type="text" v-model="user_pwd"><br>
-      <button @:click="login">登录</button>
+      <button @click="login">登录</button>
    </div>
 </body>
 </html>
@@ -27,12 +27,14 @@
         },
         methods:{
             login(){
+                // alert('aaaa')
                const user_name=this.user_name
                const user_pwd=this.user_pwd
                console.log(user_name,user_pwd)
 
                //发送 post请求， 将 用户名和密码发送给后端登录接口
-               axios.post("http://localhost:8080/user/login",{user_name:user_name,user_pass:user_pass}).then(function(res){
+               axios.post("http://localhost:8080/user/login",{user_name:user_name,user_pwd:user_pwd})
+               .then(function(res){
                         console.log(res)
                     })
             }
