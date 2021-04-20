@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="../vue.js"></script>
+    <script src="../vue-router.js"></script>
+</head>
+<body>
+    <div id="app">
+        <router-link to="/user/login">用户登录</router-link>
+        <router-link to="/user/reg">用户注册</router-link>
+        <router-view></router-view>
+    </div>
+</body>
+</html>
+<script>
+    const userlogin={
+        template:`<div>用户登录</div>`
+    }
+    const userreg={
+        template:`<div>用户注册
+           <router-link to="/user/reg/mobile">手机注册</router-link>
+            
+            </div>`
+    }
+
+    const routes=[
+        {path:"/user/login",component:userlogin},
+        {path:"/user/reg",component:userreg}
+    ]
+
+    const router=new VueRouter({
+        routes:routes
+    })
+    new Vue({
+    el:"#app",
+  router:router
+   } )
+</script>
