@@ -103,26 +103,205 @@
     </style>
   </head>
   <body>
-    <div>
-      <!-- 头部区域 -->
-      <header class="header">XX后台管理系统</header>
-      <!-- 中间主体区域 -->
-      <div class="main">
-        <!-- 左侧菜单栏 -->
-        <div class="content left">
-          <ul>
-            <li>用户管理</li>
-            <li>权限管理</li>
-            <li>商品管理</li>
-            <li>订单管理</li>
-            <li>系统设置</li>
-          </ul>
-        </div>
-        <!-- 右侧内容区域 -->
-        <div class="content right"><div class="main-content">添加用户表单</div></div>
-      </div>
-      <!-- 尾部区域 -->
-      <footer class="footer">版权信息</footer>
+
+    <div id="app">
+      <router-view></router-view>
     </div>
+
+    <script src="../vue.js"></script>
+    <script src="../vue-router.js"></script>
+    <script src="../axios.min.js"></script>
+
+    <script>
+      const App = {
+        template: `
+        <div>
+        <header class="header">XX后台管理系统</header>
+        <div class="main">
+        <div class="content left">
+        <ul>
+        <li><router-link to="/users">用户管理</router-link></li>
+        <li><router-link to="/privs">权限管理</router-link></li>
+        <li><router-link to="/goods">商品管理</router-link></li>
+        <li><router-link to="/orders">订单管理</router-link></li>
+        <li><router-link to="/settings">系统设置</router-link></li>
+        </ul>
+        </div>
+        <div class="content right">
+            <div class="main-content">
+                <router-view></router-view>
+            </div>
+        </div>
+        </div>
+        <footer class="footer">版权信息</footer>
+        </div>
+        `
+      }
+
+
+      //定义组件
+      const Users = {
+        data(){
+          return{
+            userList : []
+          }
+        },
+        template: `<div><h3>用户管理</h3>
+        <router-view :key="new Date().getMilliseconds()"></router-view>
+        <table>
+          <thead>
+          <tr><th>编号</th><th>姓名</th><th>年龄</th><th>操作</th></tr>
+          </thead>
+          <tbody>
+          <tr v-for="item in userList" :key="item.user_id">
+            <td>{{item.user_id}}</td>
+            <td>{{item.user_name}}</td>
+            <td>{{item.email}}</td>
+            <td>
+              <a href="javascript:;" @click="goDetail(item.user_id)">详情</a> |
+              <a href="javascript:;" @click="deleteUser(item.user_id)">删除</a> |
+              <router-link :to="{path:'/edit/'+item.user_id}">编辑</router-link>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+        </div>`,
+
+        created(){
+          this.getUserList()
+        },
+
+        methods: {
+          getUserList(){
+            let self = this
+            axios.get("http://localhost:8080/user/list").then(function(res){
+              self.userList = res.data
+            })
+          },
+          //用户详情
+          goDetail(userid){
+            console.log(userid)
+            //切换路由
+            this.$router.push("/userDetail/"+userid)
+          },
+          //删除用户
+          deleteUser(uid){
+            console.log(uid)
+            //请求接口
+            let self = this
+            axios.get("http://api.2008.com/user/delete?uid="+uid).then(function(res){
+              console.log("删除用户")
+              console.log(res.data)
+              self.getUserList()    //调用父级用户列表接口
+            })
+          }
+        }
+      }
+
+      const Privs = {
+        template: `<div><h3>权限管理</h3></div>`
+      }
+
+      const Goods = {
+        template: `<div><h3>商品管理</h3></div>`
+      }
+
+      const Orders = {
+        template: `<div><h3>订单管理</h3></div>`
+      }
+
+      const Settings = {
+        template: `<div><h3>系统设置</h3></div>`
+      }
+
+      //用户详情
+      const UserDetail = {
+        props: ['id'],
+        template:`
+          <div> <h3>{{id}} 用户详情</h3>
+            <button @click="goBack">返回</button>
+          </div>
+        `,
+        methods: {
+          goBack(){
+            this.$router.go(-1)
+          }
+        }
+      }
+
+      //用户编辑
+      const EditUser = {
+        props: ['uid'],
+        data(){
+          return {
+            userinfo:{}
+          }
+        },
+        template: `
+          <div>
+            <h3>{{uid}}修改用户信息</h3>
+              用户ID: <input type="text" disabled v-model="userinfo.user_id"> <br>
+              用户名： <input type="text" v-model="userinfo.user_name"> <br>
+              Email： <input type="text" v-model="userinfo.email"> <br>
+              手机号： <input type="text" v-model="userinfo.mobile"> <br><br>
+              <button @click="editUser"> 提交修改 </button>
+              <button @click="goBack"> 返回 </button>
+          <br><br>
+          </div>
+        `,
+        created(){
+          console.log("用户ID: ",this.uid)
+          let self = this
+          //请求接口获取用户信息
+          axios.get("http://api.2008.com/user/detail?uid="+this.uid).then(function(res){
+            self.userinfo = res.data.data.u
+          })
+        },
+
+        methods:{
+          editUser(){     //当用户点击修改的时候，获取 表单中的数据 并post给接口
+            console.log("修改过后的用户信息：",this.userinfo)
+            let self = this
+            axios.post("http://api.2008.com/user/update",this.userinfo).then(function(res){
+              console.log(res.data)
+              //调用父组件的  获取用户列表接口
+              self.$parent.getUserList()
+            })
+          },
+          //返回列表页
+          goBack() {
+            this.$router.push('/users')
+          }
+        }
+
+      }
+
+
+      //路由规则
+      const routes = [
+        {path: "/",component:App,children:[
+            {path:'/users',component: Users,children:[
+                {path:"/edit/:uid",component:EditUser,props:true}
+              ]},
+            {path:'/privs',component: Privs},
+            {path:'/goods',component: Goods},
+            {path:'/orders',component: Orders},
+            {path:'/settings',component: Settings},
+            {path:"/userDetail/:id",component: UserDetail,props:true} //用户详情
+          ]},
+
+
+      ]
+
+      //实例化 VueRouter
+      const router = new VueRouter({routes})
+
+      new Vue({
+        el:"#app",
+        router:router
+      })
+
+    </script>
+
   </body>
 </html>
